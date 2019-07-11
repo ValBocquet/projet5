@@ -43,41 +43,52 @@ class UserController extends AbstractController
             $user = $this->getUser();
 
             $file = $form->get('avatar_img')->getData();
-            $fileName = md5(uniqid()).'.'.$file->guessExtension();
+            $extension = strtolower(pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION));
 
-            // Move the file to the directory where brochures are stored
+            $extensionsAutorisees = array('png', 'jpg', 'jpeg');
+            if(!in_array($extension, $extensionsAutorisees)) {
+                $message = "Extension non autorisée.";
+                $state = "alert-warning";
+            } else {
+                $fileName = md5(uniqid()).'.'.$file->guessExtension();
 
-            /* on peut ajouter un avatar */
+                // Move the file to the directory where brochures are stored
+
+                /* on peut ajouter un avatar */
 
 
 
-            $file->move($this->getParameter('upload_directory'), $fileName);
+                $file->move($this->getParameter('upload_directory'), $fileName);
 
 
-            $user->setAvatar($fileName);
+                $user->setAvatar($fileName);
 
 
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($user);
-            $entityManager->flush();
+                $entityManager = $this->getDoctrine()->getManager();
+                $entityManager->persist($user);
+                $entityManager->flush();
 
-            // size img avatar
+                // size img avatar
 
-            $manager = new ImageManager();
-            $image = $manager->make('upload/' .$fileName)->fit(40,40);
-            $image->save('upload/resize_' .$fileName);
+                $manager = new ImageManager();
+                $image = $manager->make('upload/' .$fileName)->fit(40,40);
+                $image->save('upload/resize_' .$fileName);
 
-            $newNameImage = 'resize_'.$user->getAvatar();
-            $user->setAvatar($newNameImage);
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($user);
-            $entityManager->flush();
+                $newNameImage = 'resize_'.$user->getAvatar();
+                $user->setAvatar($newNameImage);
+                $entityManager = $this->getDoctrine()->getManager();
+                $entityManager->persist($user);
+                $entityManager->flush();
 
-            // suppression de la grosse image
-            $fileSystem = new Filesystem();
-            $fileSystem->remove('upload/'.$fileName);
+                // suppression de la grosse image
+                $fileSystem = new Filesystem();
+                $fileSystem->remove('upload/'.$fileName);
 
-            return $this->redirectToRoute('home');
+                $this->get('session')->setFlash('notice', 'Changement sauvegardé');
+
+                return $this->redirectToRoute('user');
+
+            }
 
         }
 
@@ -107,7 +118,10 @@ class UserController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            return $this->redirectToRoute('home');
+            $message = "Mot de passe mis à jour";
+            $state = "alert-success";
+
+            return $this->redirectToRoute('user');
         }
 
 

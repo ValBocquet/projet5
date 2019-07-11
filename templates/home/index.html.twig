@@ -6,6 +6,7 @@
 
 
 
+
 {% block body %}
     <div class="page-header" id="banner">
         <h1 class="mt-lg-5">Bienvenue sur le site</h1>
@@ -21,25 +22,41 @@
         {% endif %}
 
 
-            {% if app.user.username is defined %}
-                <div class="uploadsForm mt-lg-4">
-                        {{ form_start(form) }}
-                        {{ form_widget(form) }}
-                        <button class="btn btn-primary" type="submit">Envoyer</button>
-                        {{ form_end(form) }}
-                </div>
+        {% if app.user.username is defined %}
+        <div class="uploadsForm mt-lg-4 form-group">
+            <p id="form_success"></p>
+            {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <button class="btn btn-primary js_send" type="submit">Envoyer</button>
+            {{ form_end(form) }}
+
+            <div id="progress" class="progress">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+
+
+
+
+
         <p class="mt-lg-4 text-center"><a href="{{ path('userFiles') }}">Voir tous mes uploads</a></p>
-            {% else %}
+        {% else %}
         <div class="uploadsForm mt-lg-4" >
 
-        <p class="text-center mt-lg-4">Le service est réservé aux inscrits.</p>
-                <p class="text-center mt-lg-4">Cliquez ici pour vous <a href="{{ path('register') }}">inscrire</a> ou vous <a href="{{ path('login') }}">connecter</a>.</p>
+            <p class="text-center mt-lg-4">Le service est réservé aux inscrits.</p>
+            <p class="text-center mt-lg-4">Cliquez ici pour vous <a href="{{ path('register') }}">inscrire</a> ou vous <a href="{{ path('login') }}">connecter</a>.</p>
 
             {% endif %}
 
 
 
-    </div>
+        </div>
     </div>
 {% endblock %}
+{% block javascripts %}
 
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="js/upload.js"></script>
+
+{% endblock %}

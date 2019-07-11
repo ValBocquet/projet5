@@ -38,19 +38,37 @@ class SecurityController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $user->setIsAdmin(0);
+            $user->setPremium(0);
             $user->setCreatedAt(new \DateTime());
 
             $hash = $encoder->encodePassword($user, $user->getPassword());
             $user->setPassword($hash);
             $manager->persist($user);
             $manager->flush();
+            $message = "Inscription confirmée !";
+            $state = "alert-success";
 
-            return $this->redirectToRoute('login.html.twig');
+
+            // traitement terminé, redirection sur la page de connexion
+
+
+
+            return $this->render('login.html.twig', array(
+                'message' => trim($message),
+                'state' => trim($state),
+                'last_username' => trim($user->getEmail())
+            ));
+        } else {
+            return $this->render('register.html.twig', [
+                'formUser' => $form->createView()
+            ]);
         }
 
-        return $this->render('register.html.twig', [
+        // formulaire non soumis, on affiche ce dernier
+        /*return $this->render('register.html.twig', [
             'formUser' => $form->createView()
-        ]);
+        ]);*/
     }
 
     /**

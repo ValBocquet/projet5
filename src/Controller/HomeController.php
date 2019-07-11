@@ -48,7 +48,7 @@ class HomeController extends AbstractController
         $limiteSize = 1000000;
 
         $userId = $storage->getToken()->getUser();
-        $form = $this->createFormBuilder($datas, array('attr' => array('class' => 'form')))
+        $form = $this->createFormBuilder($datas, array('attr' => array('class' => 'form', 'id' => 'form_form')))
             ->add('NameFile', FileType::class)
             ->getForm();
 
@@ -58,6 +58,7 @@ class HomeController extends AbstractController
 
 
             $myFile = $form->get('NameFile')->getData();
+
 
             if ($myFile->getSize() <= 10000000) {
 
@@ -92,40 +93,47 @@ class HomeController extends AbstractController
                         $etat = "alert-warning";
                     } else {
                         $fileName = time() . '_' . $myFile->getClientOriginalName();
+                        $extension = strtolower(pathinfo($myFile->getClientOriginalName(), PATHINFO_EXTENSION));
 
-                        // $fileName = $myFile->getClientOriginalName().'_'. time(). $myFile->guessExtension();
-
-                        $myFile->move($this->getParameter('upload_directory'), $fileName);
-
-                        $datas->setNameFile($fileName);
-                        $datas->setIdUser($userId);
-                        $datas->setSizeFile(filesize('upload/' . $fileName));
-                        $datas->setCreateAt(new \DateTime());
-
-                        if ($userId->getSizeUpload() != null) {
-                            $userId->setSizeUpload($userId->getSizeUpload() + filesize('upload/' . $fileName));
+                        $extensionsAutorisees = array('pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx');
+                        if (!in_array($extension, $extensionsAutorisees)) {
+                            $message = "Extension non autorisée.";
+                            $etat = "alert-warning";
                         } else {
-                            $userId->setSizeUpload(filesize('upload/' . $fileName));
+                            // $fileName = $myFile->getClientOriginalName().'_'. time(). $myFile->guessExtension();
+
+                            $myFile->move($this->getParameter('upload_directory'), $fileName);
+
+                            $datas->setNameFile($fileName);
+                            $datas->setIdUser($userId);
+                            $datas->setSizeFile(filesize('upload/' . $fileName));
+                            $datas->setCreateAt(new \DateTime());
+
+                            if ($userId->getSizeUpload() != null) {
+                                $userId->setSizeUpload($userId->getSizeUpload() + filesize('upload/' . $fileName));
+                            } else {
+                                $userId->setSizeUpload(filesize('upload/' . $fileName));
+                            }
+
+                            $message = "Fichier bien uploadé ! ";
+                            $etat = 'alert-success';
+
+                            $manager->persist($userId);
+                            $manager->persist($datas);
+                            $manager->flush();
+
                         }
 
-                        $message = "Fichier bien uploadé ! ";
-                        $etat = 'alert-success';
 
-                        $manager->persist($userId);
-                        $manager->persist($datas);
-                        $manager->flush();
                     }
 
                 }
 
-            }
-            else {
+            } else {
                 $etat = "alert-danger";
                 $message = "La taille du fichier ne doit pas dépasser 10 Mo.";
             }
         }
-
-
 
 
         return $this->render('home/index.html.twig', [
@@ -139,7 +147,8 @@ class HomeController extends AbstractController
     /**
      * @Route("user_files", name="userFiles")
      */
-    public function displayFilesByUser(TokenStorageInterface $storage, PaginatorInterface $paginator, Request $request, DatasRepository $repository) {
+    public function displayFilesByUser(TokenStorageInterface $storage, PaginatorInterface $paginator, Request $request, DatasRepository $repository)
+    {
 
         $this->repository = $repository;
         $userId = $storage->getToken()->getUser();
@@ -158,7 +167,6 @@ class HomeController extends AbstractController
             $sizeUpload = substr($sizeUpload, 0, 3);
 
 
-
             return $this->render('user/uploads.html.twig', [
                 'myUploads' => $myUploads,
                 'sizeUpload' => $sizeUpload,
@@ -168,14 +176,13 @@ class HomeController extends AbstractController
         }
 
 
-
-
     }
 
     /**
      * @Route("user_delete/{id}", name="user_delete")
      */
-    public function deleteFile($id, EntityManagerInterface $manager) {
+    public function deleteFile($id, EntityManagerInterface $manager)
+    {
         $user = $this->getUser();
 
         // je récupère les informations du fichier à supprimer
@@ -205,7 +212,7 @@ class HomeController extends AbstractController
         // je supprime le fichier du server
 
         $fileSystem = new Filesystem();
-        $fileSystem->remove('upload/'.$fileToDelete->getNameFile());
+        $fileSystem->remove('upload/' . $fileToDelete->getNameFile());
 
         // je supprime le fichier en db
 
