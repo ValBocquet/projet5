@@ -122,6 +122,7 @@ class HomeController extends AbstractController
                             $manager->persist($datas);
                             $manager->flush();
 
+
                         }
 
 
@@ -222,7 +223,7 @@ class HomeController extends AbstractController
         $message = "Fichier supprimé avec succès du serveur";
         $etat = "alert-success";
 
-        return $this->redirectToRoute('home');
+        return $this->redirectToRoute('userFiles');
 
     }
 }

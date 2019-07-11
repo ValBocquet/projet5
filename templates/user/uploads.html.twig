@@ -5,7 +5,7 @@
 
     <h1 class="mt-lg-4">Mes fichiers uploadés</h1>
     <p class="mt-lg-4">Actuellement, vous utilisez {{ sizeUpload }}mo sur {{ (premium == true) ? '1go.' : '100mo' }}</p>
-    <div class="list-group">
+    {#<div class="list-group">
                 {% for myUpload in myUploads %}
 
                    <p class="text-center mt-lg-4">
@@ -15,7 +15,26 @@
                        <a href="{{ path("user_delete", {'id' : myUpload.id})}}" class="link_del"><i class="fas fa-trash bin"></i></a>
                    </p>
                 {% endfor %}
+    </div>#}
+
+    {% for myUpload in myUploads %}
+        {% set nameFile = myUpload.nameFile|split('_') %}
+    <div class="row row_user">
+        <div class="col-sm">
+            <p class="list_upload">
+                {{ nameFile[1]}} (le {{ myUpload.getCreateAt|date('d-m-Y') }})
+            </p>
         </div>
+        <div class="col-md-auto">
+            <a href="{{ path("user_delete", {'id' : myUpload.id})}}" class="link_del"><i class="fas fa-trash bin"></i></a>
+        </div>
+        <div class="col col-lg-2">
+            <a class="btn_copy" href="upload/{{ myUpload.nameFile }}" download="{{ nameFile[1] }}">Ouvrir</a>
+        </div>
+    </div>
+    {% endfor %}
+
+
     <div class="pagination page">
         {{ knp_pagination_render(myUploads) }}
     </div>

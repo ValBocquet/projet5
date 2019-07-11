@@ -149,7 +149,9 @@ label[for=form_avatar_img], .avatar_form label, .uploadsForm label {
     margin-top: 20px;
 }
 
-
+#form_form {
+    text-align: center;
+}
 
 /**
 RESPONSIVE
@@ -161,6 +163,9 @@ RESPONSIVE
     }
     .container-body {
         text-align: center;
+    }
+    .row_user {
+        padding-bottom: 30px;
     }
 
 }
