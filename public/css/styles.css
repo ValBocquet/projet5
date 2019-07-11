@@ -148,7 +148,9 @@ label[for=form_avatar_img], .avatar_form label, .uploadsForm label {
 .pagination nav {
     margin-top: 20px;
 }
-
+#form_form {
+    text-align: center;
+}
 
 
 /**
