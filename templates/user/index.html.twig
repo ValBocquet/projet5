@@ -13,7 +13,13 @@
 
 
     <p class="mt-lg-5">Dans cet espace, tu vas pouvoir mettre à jour ton profil facilement et rapidement.</p>
+    {% if message is defined %}
+        <div class="alert {{ state }}">
+            {{ message }}
+        </div>
+    {% endif %}
     <div class="row">
+
         <div class="col avatar_form">
             <h2 class="mt-lg-5">Modifier l'avatar :</h2>
 

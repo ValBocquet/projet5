@@ -32,14 +32,28 @@ class UserController extends AbstractController
      */
 
     public function index(EntityManagerInterface $entityManager, Request $request, UsersRepository $repository, UserPasswordEncoderInterface $encoder) : Response {
-        $form = $this->createFormBuilder()
+        $form = $this->createFormBuilder(array('allow_extra_fields' => true))
             ->add('avatar_img', FileType::class)
             ->getForm();
+
+        $formPass = $this->createFormBuilder(array('allow_extra_fields' => true))
+            ->add('password', RepeatedType::class, [
+                'type' => PasswordType::class,
+                'invalid_message' => 'Les mots de passe doivent être identiques.',
+                'options' => ['attr' => ['class' => 'form-control']],
+                'required' => true,
+                'first_options' => ['label' => 'Mot de passe :'],
+                'second_options' => ['label' => 'Confirmez le mot de passe :'],
+            ])
+            ->getForm();
+
         $form->handleRequest($request);
 
-
+        $message = "";
+        $state = "";
 
         if ($form->isSubmitted() && $form->isValid()) {
+
 
 
             $user = $this->getUser();
@@ -86,24 +100,21 @@ class UserController extends AbstractController
                 $fileSystem = new Filesystem();
                 $fileSystem->remove('upload/'.$fileName);
 
-                $this->get('session')->setFlash('notice', 'Changement sauvegardé');
+                $message = "Avatar mis à jour";
+                $state = "alert-success";
 
-                return $this->redirectToRoute('user');
+
+                return $this->render('user/index.html.twig', [
+                    'message' => $message,
+                    'state' => $state,
+                    'form' => $form->createView(),
+                    'formPass' => $formPass->createView()
+                ]);
 
             }
 
         }
 
-        $formPass = $this->createFormBuilder()
-            ->add('password', RepeatedType::class, [
-                'type' => PasswordType::class,
-                'invalid_message' => 'Les mots de passe doivent être identiques.',
-                'options' => ['attr' => ['class' => 'form-control']],
-                'required' => true,
-                'first_options' => ['label' => 'Mot de passe :'],
-                'second_options' => ['label' => 'Confirmez le mot de passe :'],
-            ])
-            ->getForm();
 
         $formPass->handleRequest($request);
 
@@ -123,13 +134,20 @@ class UserController extends AbstractController
             $message = "Mot de passe mis à jour";
             $state = "alert-success";
 
-            return $this->redirectToRoute('user');
+            return $this->render('user/index.html.twig', [
+                'message' => $message,
+                'state' => $state,
+                'form' => $form->createView(),
+                'formPass' => $formPass->createView()
+            ]);
         }
 
 
         return $this->render('user/index.html.twig', [
             'form' => $form->createView(),
-            'formPass' => $formPass->createView()
+            'formPass' => $formPass->createView(),
+            'message' => $message,
+            'state' => $state
         ]);
     }
 
@@ -145,6 +163,8 @@ class UserController extends AbstractController
                 ->getForm();
             $form->handleRequest($request);
 
+            $message = "";
+            $state = "";
             if($form->isSubmitted() && $form->isValid()) {
                 $emailSent = $form->getData()['email'];
                 $user = $this->getDoctrine()
@@ -174,7 +194,7 @@ class UserController extends AbstractController
 
 
                    $message = (new \Swift_Message('Hello Email'))
-                       ->setFrom('valentin.bocquet9@gmail.com')
+                       ->setFrom('admin@valentinbocquet.fr')
                        ->setTo($user->getEmail())
                        ->setBody('Voici votre nouveau mot de passe : ' . $newMdp)
 
@@ -184,20 +204,29 @@ class UserController extends AbstractController
                    $mailer->send($message);
 
 
-                   dump('mail envoyé');
+                   $message = "Nouveau mot de passe envoyé par e-mail";
+                   $state = "alert-success";
 
                } else {
                    // j'ai pas d'entree
                    $message = "Cette adresse email n'existe pas chez nous";
                    $state = "alert-danger";
-                   dump('not cool');
+
+                   return $this->render('user/mdp_forgot.html.twig', [
+                       'message' => $message,
+                       'state' => $state,
+                       'form' => $form->createView()
+                   ]);
+
                }
             }
 
 
 
             return $this->render('user/mdp_forgot.html.twig', [
-                'form' => $form->createView()
+                'form' => $form->createView(),
+                'message' => $message,
+                'state' => $state
             ]);
         }
 
