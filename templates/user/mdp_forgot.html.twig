@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1 class="mt-lg-4">Mot de passe oublié</h1>
+    <p class="mt-lg-4">Pour recevoir votre nouveau mot de passe, merci de compléter le formulaire ci-dessous :</p>
+    <div class="form-group text-center">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+        {{ form_row(form.email) }}
+        <button type="submit" class="btn btn-primary">Recevoir le nouveau mot de passe</button>
+        {{ form_end(form) }}
+    </div>
+
+{% endblock %}
