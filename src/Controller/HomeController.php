@@ -29,6 +29,12 @@ class HomeController extends AbstractController
 
     /**
      * @Route("/", name="home")
+     * Method to upload a file
+     * @param Request $request
+     * @param TokenStorageInterface $storage
+     * @param UsersRepository $repository
+     * @param ObjectManager $manager
+     * @return void
      */
     public function index(Request $request, TokenStorageInterface $storage, UsersRepository $repository, ObjectManager $manager)
     {
@@ -122,6 +128,7 @@ class HomeController extends AbstractController
                             $manager->persist($datas);
                             $manager->flush();
 
+
                         }
 
 
@@ -146,7 +153,14 @@ class HomeController extends AbstractController
 
     /**
      * @Route("user_files", name="userFiles")
+     * Display the files uploaded by user with pagination
+     * @param TokenStorageInterface $storage
+     * @param PaginatorInterface $paginator
+     * @param Request $request
+     * @param DatasRepository $repository
+     * @return void
      */
+
     public function displayFilesByUser(TokenStorageInterface $storage, PaginatorInterface $paginator, Request $request, DatasRepository $repository)
     {
 
@@ -180,7 +194,12 @@ class HomeController extends AbstractController
 
     /**
      * @Route("user_delete/{id}", name="user_delete")
+     * Method to delete file 
+     * @param [type] $id
+     * @param EntityManagerInterface $manager
+     * @return void
      */
+    
     public function deleteFile($id, EntityManagerInterface $manager)
     {
         $user = $this->getUser();
@@ -222,7 +241,7 @@ class HomeController extends AbstractController
         $message = "Fichier supprimé avec succès du serveur";
         $etat = "alert-success";
 
-        return $this->redirectToRoute('home');
+        return $this->redirectToRoute('userFiles');
 
     }
 }

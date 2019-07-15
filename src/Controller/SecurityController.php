@@ -19,7 +19,14 @@ class SecurityController extends AbstractController
 {
     /**
      * @Route("register", name="register")
+     * Method to register an user
+     * @param Request $request
+     * @param ObjectManager $manager
+     * @param UserPasswordEncoderInterface $encoder
+     * @param TokenStorageInterface $storage
+     * @return void
      */
+
     public function register(Request $request, ObjectManager $manager, UserPasswordEncoderInterface $encoder, TokenStorageInterface $storage)
     {
 
@@ -50,7 +57,7 @@ class SecurityController extends AbstractController
             $state = "alert-success";
 
 
-            // traitement terminé, redirection sur la page de connexion
+            // work over, redirection to the login's page
 
 
 
@@ -65,7 +72,7 @@ class SecurityController extends AbstractController
             ]);
         }
 
-        // formulaire non soumis, on affiche ce dernier
+        // form not submitted, display this form
         /*return $this->render('register.html.twig', [
             'formUser' => $form->createView()
         ]);*/
@@ -73,6 +80,9 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("login", name = "login")
+     * Auth's method  
+     * @param AuthenticationUtils $authenticationUtils
+     * @return void
      */
 
     public function login(AuthenticationUtils $authenticationUtils)
@@ -88,8 +98,10 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("deconnexion", name="logout")
+     * Logout's method
+     * @return void
      */
-
+    
     public function logout()
     {
 

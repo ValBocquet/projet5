@@ -27,9 +27,15 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class UserController extends AbstractController
 {
-    /**
-     * @Route("/user", name="user")
-     */
+      /**
+      * Function with form (avatar and password)
+      * @param EntityManagerInterface $entityManager
+      * @param Request $request
+      * @param UsersRepository $repository
+      * @param UserPasswordEncoderInterface $encoder
+      * @return Response
+      * @Route("/user", name="user")
+      */
 
     public function index(EntityManagerInterface $entityManager, Request $request, UsersRepository $repository, UserPasswordEncoderInterface $encoder) : Response {
         $form = $this->createFormBuilder(array('allow_extra_fields' => true))
@@ -54,10 +60,7 @@ class UserController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-
-
             $user = $this->getUser();
-
             $file = $form->get('avatar_img')->getData();
             $extension = strtolower(pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION));
 
@@ -70,9 +73,7 @@ class UserController extends AbstractController
 
                 // Move the file to the directory where brochures are stored
 
-                /* on peut ajouter un avatar */
-
-
+                /* we can add this avatar */
 
                 $file->move($this->getParameter('upload_directory'), $fileName);
 
@@ -96,7 +97,7 @@ class UserController extends AbstractController
                 $entityManager->persist($user);
                 $entityManager->flush();
 
-                // suppression de la grosse image
+                // delete big image
                 $fileSystem = new Filesystem();
                 $fileSystem->remove('upload/'.$fileName);
 
@@ -134,6 +135,7 @@ class UserController extends AbstractController
             $message = "Mot de passe mis à jour";
             $state = "alert-success";
 
+
             return $this->render('user/index.html.twig', [
                 'message' => $message,
                 'state' => $state,
@@ -154,6 +156,14 @@ class UserController extends AbstractController
 
         /**
          * @Route("mdp_forgot", name="mdp_forgot")
+         * Function for backup the mdp
+         *
+         * @param Request $request
+         * @param UsersRepository $usersRepository
+         * @param EntityManagerInterface $entityManager
+         * @param UserPasswordEncoderInterface $encoder
+         * @param \Swift_Mailer $mailer
+         * @return void
          */
         public function mdp_forgot(Request $request, UsersRepository $usersRepository, EntityManagerInterface $entityManager, UserPasswordEncoderInterface $encoder, \Swift_Mailer $mailer) {
             $form = $this->createFormBuilder()
@@ -174,24 +184,22 @@ class UserController extends AbstractController
 
 
                if($user != null) {
-                   // j'ai une entrée qui correspond à l'adresse email saisie
-                   // je créé un nouveau mot de passe pour l'user en question
-                   // mot de passe pour se connecter : $newMdp
+                   // the data sent matchs with database's data
+                   // creatin password for this user
+                   // password for connect : $newMdp
                    $newMdp = password_hash(uniqid(), PASSWORD_DEFAULT);
 
 
 
-                    // encodage du nouveau mot de passe via bcrypt
+                    // encodage with bcrypt
                    $hash = $encoder->encodePassword($user, $newMdp);
 
 
                     $user->setPassword($hash);
                     $entityManager->persist($user);
                     $entityManager->flush();
-                    // mise à jour de la base de données
 
-                   // on peut envoyer le mail avec le new mdp
-
+                   // send email with a new password
 
                    $message = (new \Swift_Message('Hello Email'))
                        ->setFrom('admin@valentinbocquet.fr')
@@ -208,7 +216,7 @@ class UserController extends AbstractController
                    $state = "alert-success";
 
                } else {
-                   // j'ai pas d'entree
+                   // the mail sent doesn't matchs with database
                    $message = "Cette adresse email n'existe pas chez nous";
                    $state = "alert-danger";
 
@@ -220,9 +228,6 @@ class UserController extends AbstractController
 
                }
             }
-
-
-
             return $this->render('user/mdp_forgot.html.twig', [
                 'form' => $form->createView(),
                 'message' => $message,
